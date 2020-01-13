@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+    <style>
+        .right-align {
+            text-align: right;
+        }
+
+        .row {
+            margin-bottom: 10px;
+        }
+    </style>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="container">
+    <div class="page-header">
+        <h2>商品详情</h2>
+    </div>
+    <div class="row" id="promoStartDateContainer">
+        <div class="col-md-2 right-align">
+            <label for="promoStartDate" class="control-label" id="promoStatus"></label>
+        </div>
+        <div class="col-md-6">
+            <label class="control-label" style="color:red" id="promoStartDate"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 right-align">
+            <label class="control-label">商品名</label>
+        </div>
+        <div class="col-md-6">
+            <label class="control-label" name="title" id="title"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 right-align">
+            <label for="description" class="control-label">商品描述</label>
+        </div>
+        <div class="col-md-6">
+            <label class="control-label" name="description" id="description"/>
+        </div>
+    </div>
+    <div class="row" id = 'normalPriceContainer'>
+        <div class="col-md-2 right-align">
+            <label for="price" class="control-label">价格</label>
+        </div>
+        <div class="col-md-6">
+            <label class="control-label" name="price" id="price"/>
+        </div>
+    </div>
+    <div class="row" id="promoPriceContainer">
+        <div class="col-md-2 right-align">
+            <label for="promoPrice" class="control-label">秒杀价格</label>
+        </div>
+        <div class="col-md-6">
+            <label class="control-label" style="color:red" id="promoPrice"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 right-align">
+            <label for="imgUrl" class="control-label">图片</label>
+        </div>
+        <div class="col-md-6">
+            <label class="control-label" name="imgUrl" id="imgUrl"><img id="img0" style="width: 60px"/></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 right-align">
+            <label for="stock" class="control-label">库存</label>
+        </div>
+        <div class="col-md-6">
+            <label class="control-label" name="stock" id="stock"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 right-align">
+            <label for="sales" class="control-label">销量</label>
+        </div>
+        <div class="col-md-6">
+            <label class="control-label" name="sales" id="sales"/>
+        </div>
+    </div>
+
+    <div class="row">
+        <hr/>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-md-offset-2">
+            <button class="btn btn-info" id="makeOrder">下单</button>
+        </div>
+    </div>
+
+</div>
+
+</body>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var queryString = window.location.search;
+        var itemid = queryString.split("=")[1];
+        var item = "";
+
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:80/item/getitem?id=" + itemid,
+            success: function (data) {
+                console.log(data);
+                var item = data["data"];
+                reloadDom(item);
+                setInterval(reloadDom(item), 1);
+            },
+            error: function (data) {
+                alert("获取商品详情, 原因为：" + data.responseText);
+            }
+        });
+
+        $("#makeOrder").click(function () {
+            $.ajax({
+                type: "POST",
+                url: "http://localhost:80/order/createOrder",
+                contentType:"application/x-www-form-urlencoded",
+                xhrFields:{withCredentials:true},
+                data: {
+                    "itemId": itemid,
+                    "amount": 1,
+                    "promoId": item.promoId
+                },
+                success: function (data) {
+                    if(data.status == "success"){
+                        console.log(data);
+                        alert("下单成功");
+                        window.location.reload();
+                    }else{
+                        alert("下单失败, 原因为 "+data.data.errMsg);
+                        if(data.data.errCode == "20003"){
+                            window.location.href = "file:///E:/working_space_lixj/Git_Repository/MiaoSha_from_mook/MiaoshaFromMoolk/src/main/resources/statics/login.html";
+                        }
+                    }
+                },
+                error: function (data) {
+                    alert("下单失败, 原因为：" + data.responseText);
+                }
+            });
+        });
+
+        function reloadDom(item) {
+            $("#title").text(item.title);
+            $("#description").text(item.description);
+            $("#price").text(item.price);
+            $("#img0").attr("src", item.imgUrl);
+            $("#stock").text(item.stock);
+            $("#sales").text(item.sales);
+            if(item.promoStatus == 1){
+                var startTime = item.startDate.replace(new RegExp("-", "gm"), "/");
+                startTime = (new Date(startTime)).getTime();
+                var nowTime = Date.parse(new Date());
+                var delta = (startTime - nowTime)/1000;
+                console.log(delta);
+                if(delta <= 0){
+                    item.promoStatus = 2;
+                    reloadDom(item);
+                }
+                $("#promoStartDate").text("秒杀活动将于" + item.startDate + "开始售卖\n倒计时" + delta + "秒");
+                $("#promoPrice").text(item.promoPrice);
+                $("#makeOrder").attr("disabled", true);
+            }else if(item.promoStatus == 2){
+                $("#promoStartDate").text("秒杀正在进行中");
+                $("#promoPrice").text(item.promoPrice);
+                $("#makeOrder").attr("disabled", false);
+                $("#normalPriceContainer").hide();
+            }else{
+
+            }
+        }
+
+    });
+
+</script>
+
+
+</html>

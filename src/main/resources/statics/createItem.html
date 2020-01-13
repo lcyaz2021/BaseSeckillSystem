@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+    <style>
+        .right-align {
+            text-align: right;
+        }
+
+        .row {
+            margin-bottom: 10px;
+        }
+    </style>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="container">
+    <div class="page-header">
+        <h2>创建商品</h2>
+    </div>
+    <div class="row">
+        <div class="col-md-2 right-align">
+            <label for="title" class="control-label">商品名</label>
+        </div>
+        <div class="col-md-6">
+            <input type="text" placeholder="名称" class="form-control" name="title" id="title">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 right-align">
+            <label for="description" class="control-label">商品描述</label>
+        </div>
+        <div class="col-md-6">
+            <input type="text" placeholder="描述" class="form-control" name="description" id="description">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 right-align">
+            <label for="price" class="control-label">价格</label>
+        </div>
+        <div class="col-md-6">
+            <input type="text" class="form-control" name="price" id="price">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 right-align">
+            <label for="imgUrl" class="control-label">图片</label>
+        </div>
+        <div class="col-md-6">
+            <input type="text" class="form-control" name="imgUrl" id="imgUrl">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 right-align">
+            <label for="stock" class="control-label">库存</label>
+        </div>
+        <div class="col-md-6">
+            <input type="text" class="form-control" name="stock" id="stock">
+        </div>
+    </div>
+
+    <div class="row">
+        <hr/>
+    </div>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-2">
+            <button class="btn btn-info" id="create">提交创建</button>
+        </div>
+    </div>
+</div>
+
+</body>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#create").click(function () {
+            var title = $("#title").val();
+            var description = $("#description").val();
+            var price = $("#price").val();
+            var stock = $("#stock").val();
+            var imgUrl = $("#imgUrl").val();
+            /**
+             * 一系列的前端校验，此处省略
+             */
+            $.ajax({
+                url: "http://localhost:80/item/createItem",
+                contentType:"application/x-www-form-urlencoded",
+                type: "POST",
+                xhrFields:{withCredentials:true},
+                data: {
+                    "title": title,
+                    "description": description,
+                    "price": price,
+                    "stock": stock,
+                    "imgUrl": imgUrl
+                },
+                success: function (data) {
+                    console.log(data);
+                    if (data.status == "success") {
+                        alert("创建商品成功");
+                    } else {
+                        alert("创建商品失败，原因为：" + data.data.errMsg);
+                    }
+                },
+                error: function (data) {
+                    alert("创建商品失败, 原因为：" + data.responseText);
+                }
+            })
+        });
+    });
+
+</script>
+
+
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+    <style>
+        .right-align {
+            text-align: right;
+        }
+
+        .row {
+            margin-bottom: 10px;
+        }
+    </style>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="container">
+    <div class="page-header">
+        <h2>商品列表浏览</h2>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>商品名</th>
+                <th>商品图片</th>
+                <th>商品价格</th>
+                <th>商品描述</th>
+                <th>商品库存</th>
+                <th>商品销量</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+
+</body>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:80/item/list",
+            success: function (data) {
+                console.log(data);
+                var items = data["data"];
+                for (var i = 0; i < items.length; i++) {
+                    var itemid = items[i].id;
+                    var imgStr = "<img src=" + items[i]["imgUrl"] + " style='width:60px'>";
+                    var trStr = "<tr class='itemDetail'><td>" + items[i]["title"] + "</td> <td>" + imgStr + "</td> <td>" + items[i]["price"] +
+                        "</td><td>" + items[i]["description"] + "</td><td>" + items[i]["stock"] + "</td><td>" + items[i]["sales"] + "</td></tr>";
+                    $("tbody").append(trStr);
+
+                    $(".itemDetail").click(function () {
+                        window.location.href = "file:///E:/working_space_lixj/Git_Repository/MiaoSha_from_mook/MiaoshaFromMoolk/src/main/resources/statics/getitem.html?id=" + itemid;
+                    });
+
+                }
+
+            },
+            error: function (data) {
+                alert("获取列表失败, 原因为：" + data.responseText);
+            }
+        });
+
+    });
+
+</script>
+
+
+</html>
